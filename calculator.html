@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vel Tech Attendance Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-4.0.3&auto=format&fit=crop&w=2560&q=80');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .calculate-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .calculate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .result {
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 600;
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result.eligible {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .result.warning {
+            background: linear-gradient(135deg, #fa709a, #fee140);
+            color: white;
+        }
+
+        .result.not-eligible {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            color: white;
+        }
+
+        .percentage {
+            font-size: 36px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+
+        .status {
+            font-size: 20px;
+            margin: 15px 0;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .advice {
+            font-size: 16px;
+            margin-top: 15px;
+            line-height: 1.6;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">Vel Tech Attendance Calculator</h1>
+            <p class="subtitle">Track your attendance and stay eligible</p>
+        </div>
+
+        <div class="form-group">
+            <label for="totalSessions">Total Number of Sessions:</label>
+            <input type="number" id="totalSessions" min="1" placeholder="Enter total sessions conducted">
+        </div>
+
+        <div class="form-group">
+            <label for="attendedSessions">Sessions Attended:</label>
+            <input type="number" id="attendedSessions" min="0" placeholder="Enter sessions you attended">
+        </div>
+
+        <button onclick="calculateAttendance()" class="calculate-btn">Calculate Attendance</button>
+
+        <div id="result" class="result">
+            <div id="percentage" class="percentage"></div>
+            <div id="status" class="status"></div>
+            <div id="stats" class="stats"></div>
+            <div id="advice" class="advice"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAttendance() {
+            console.log("Calculate button clicked!");
+            
+            // Get input values
+            const totalInput = document.getElementById('totalSessions');
+            const attendedInput = document.getElementById('attendedSessions');
+            
+            const totalSessions = parseInt(totalInput.value);
+            const attendedSessions = parseInt(attendedInput.value);
+            
+            console.log("Total Sessions:", totalSessions);
+            console.log("Attended Sessions:", attendedSessions);
+            
+            // Validation
+            if (!totalSessions || totalSessions <= 0) {
+                alert('Please enter a valid number for total sessions!');
+                return;
+            }
+            
+            if (!attendedSessions && attendedSessions !== 0) {
+                alert('Please enter attended sessions!');
+                return;
+            }
+            
+            if (attendedSessions < 0) {
+                alert('Attended sessions cannot be negative!');
+                return;
+            }
+            
+            if (attendedSessions > totalSessions) {
+                alert('Attended sessions cannot be more than total sessions!');
+                return;
+            }
+            
+            // Calculate percentage
+            const percentage = (attendedSessions / totalSessions) * 100;
+            console.log("Calculated percentage:", percentage);
+            
+            // Get result elements
+            const resultDiv = document.getElementById('result');
+            const percentageDiv = document.getElementById('percentage');
+            const statusDiv = document.getElementById('status');
+            const statsDiv = document.getElementById('stats');
+            const adviceDiv = document.getElementById('advice');
+            
+            // Display percentage
+            percentageDiv.textContent = percentage.toFixed(1) + '%';
+            
+            // Display stats
+            const missedSessions = totalSessions - attendedSessions;
+            statsDiv.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-number">${attendedSessions}</div>
+                    <div class="stat-label">Attended</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">${missedSessions}</div>
+                    <div class="stat-label">Missed</div>
+                </div>
+            `;
+            
+            // Check eligibility (75% required)
+            if (percentage >= 75) {
+                // ELIGIBLE
+                statusDiv.textContent = '✅ ELIGIBLE';
+                
+                // Calculate how many classes they can miss
+                const maxTotalWithEligibility = Math.floor(attendedSessions / 0.75);
+                const canMiss = Math.max(0, maxTotalWithEligibility - totalSessions);
+                
+                if (canMiss > 0) {
+                    adviceDiv.innerHTML = `
+                        🎉 Great! You are eligible with ${percentage.toFixed(1)}% attendance.<br><br>
+                        📚 You can afford to miss up to <strong>${canMiss}</strong> more classes and still maintain eligibility.<br><br>
+                        ⚠️ But remember, regular attendance helps in better learning!
+                    `;
+                    resultDiv.className = 'result eligible show';
+                } else {
+                    adviceDiv.innerHTML = `
+                        🎉 You are eligible with ${percentage.toFixed(1)}% attendance.<br><br>
+                        ⚠️ Warning: You cannot afford to miss any more classes to maintain eligibility.<br><br>
+                        📖 Keep attending all remaining classes!
+                    `;
+                    resultDiv.className = 'result warning show';
+                }
+            } else {
+                // NOT ELIGIBLE
+                statusDiv.textContent = '❌ NOT ELIGIBLE';
+                
+                // Calculate classes needed
+                const classesNeeded = Math.ceil((0.75 * totalSessions - attendedSessions) / 0.25);
+                const newPercentage = ((attendedSessions + classesNeeded) / (totalSessions + classesNeeded)) * 100;
+                
+                adviceDiv.innerHTML = `
+                    ❌ You are not eligible with ${percentage.toFixed(1)}% attendance.<br><br>
+                    📈 You need to attend at least <strong>${classesNeeded}</strong> more consecutive classes to become eligible.<br><br>
+                    🎯 After attending ${classesNeeded} classes, your attendance will be ${newPercentage.toFixed(1)}%<br><br>
+                    💪 Start attending regularly - you can do it!
+                `;
+                resultDiv.className = 'result not-eligible show';
+            }
+            
+            console.log("Result displayed successfully!");
+        }
+        
+        // Allow Enter key to calculate
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                calculateAttendance();
+            }
+        });
+        
+        // Auto-adjust attended sessions if greater than total
+        document.getElementById('attendedSessions').addEventListener('input', function() {
+            const total = parseInt(document.getElementById('totalSessions').value) || 0;
+            const attended = parseInt(this.value) || 0;
+            
+            if (attended > total && total > 0) {
+                this.value = total;
+            }
+        });
+    </script>
+</body>
+</html>
